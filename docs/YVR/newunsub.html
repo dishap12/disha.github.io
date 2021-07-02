@@ -1,0 +1,104 @@
+<html>
+    <head>
+        <title>Unsubscribe from email</title>
+        <!-- your WizRocket JS embed code goes here -->
+        <script type="text/javascript">
+            var clevertap = {event:[], profile:[], account:[], onUserLogin:[], notifications:[]};
+        // replace with the CLEVERTAP_ACCOUNT_ID with the actual ACCOUNT ID value from your Dashboard -> Settings page
+        clevertap.account.push({"id": "W44-Z4K-K65ZZ"});
+        (function () {
+                var wzrk = document.createElement('script');
+                wzrk.type = 'text/javascript';
+                wzrk.async = true;
+                wzrk.src = //a.js url;
+                var s = document.getElementsByTagName('script')[0];
+                s.parentNode.insertBefore(wzrk, s);
+         })();
+       </script>
+    </head>
+    <body>
+        <div>
+            <h4>I want to unsubscribe from future emails</h4>
+            <input type="text" id="email" />
+            <br/><br/>
+            <!-- button onclick="resubscribe()">Resubscribe</button -->
+        </div>
+        <div id="unsubscribe-groups" style="display: none">
+        </div>
+        <button onclick="unsubscribe()">Unsubscribe me</button><br/><br/>
+        <button onclick="resubscribe()">Resubscribe me</button><br/><br/>
+        <button onclick="changeSubscriptionGroups()">changeSubscriptionGroups</button><br/><br/>
+        <script>
+            // on  page load, fetch the email id of the user.
+            window.onload = function() {
+                var withGroups = true;
+                $WZRK_WR.getEmail(false, withGroups);
+            };
+            // will be called after the email id of the user has been fetched
+            function wzrk_email_fetched(emailStr, profile) {
+                debugger
+                document.getElementById("email").value = emailStr;
+                setGroups(profile)
+            }
+            function setGroups(profile) {
+                debugger
+                if(!profile || !profile.groups || profile.groups.length === 0) {
+                    return;
+                }
+                $WZRK_WR.setUpdatedCategoryLong(profile);
+                $WZRK_WR.setSubscriptionGroups(profile.groups);
+                var addList = document.getElementById('unsubscribe-groups');
+                addList.style.display = 'block'
+                for(var i = 0; i < profile.groups.length; i++) {
+                    var obj = profile.groups[i];
+                    var checkBox = document.createElement("INPUT");
+                    var isUnsubscribed = obj.isUnsubscribed
+                    checkBox.setAttribute("type", "checkbox");
+                    if(isUnsubscribed){
+                        checkBox.setAttribute("checked", true);
+                    }
+                    checkBox.setAttribute("name", obj.name)
+                    checkBox.setAttribute("id", obj.name)
+                    checkBox.setAttribute("class", "ct-unsub-group-input-item");
+                    var label = document.createElement("LABEL");
+                    label.setAttribute("for", obj.name)
+                    label.innerHTML = "Unsubscribe to " + obj.name 
+                    addList.appendChild(label);
+                    addList.appendChild(checkBox);
+                    addList.append(document.createElement('br'));
+                }
+            } 
+            // will be called after the subscription preferences for the user have been updated
+            function wzrk_email_subscription(status) {
+                //status 0 : unsubscribed, status 1 : subscribed
+                // todo - you can show a success message to the user from here
+                var statusLabel = 'subscribed';
+                if (status == 0) {
+                    statusLabel = 'unsubscribed';
+                }
+                alert("You've been " + statusLabel);
+            }
+            // call this function to unsubscribe the user
+            function unsubscribe() {
+                $WZRK_WR.unSubEmail(false);
+            }
+            function changeSubscriptionGroups() {
+                let unsubcribeGroups = [];
+                var elements = document.getElementsByClassName(
+                    "ct-unsub-group-input-item");
+                for (var i = 0; i < elements.length; i++) {
+                    var element = elements[i];
+                    if(element.name) {
+                        var data = {name: element.name, isUnsubscribed: element.checked}
+                        unsubcribeGroups.push(data)
+                    }
+                }
+                $WZRK_WR.changeSubscriptionGroups(false, unsubcribeGroups);
+            }
+            // call this function to resubscribe the user
+            function resubscribe() {
+                $WZRK_WR.subEmail(false);
+            }
+        </script>
+    </body>
+    </html>
